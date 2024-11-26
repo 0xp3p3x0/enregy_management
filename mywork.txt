@@ -1,0 +1,31 @@
+Clean and Prepare the Data:
+
+    Combine Date and Time into a DateTime column.
+    Drop the Unnamed: 0 column.
+    Convert min, avg, and max columns to numeric types.
+    Handle missing or invalid values, if any.
+Analyze and Visualize the Data:
+
+    Perform resampling for hourly, daily, and weekly summaries.
+    Calculate descriptive statistics.
+    Generate visualizations to explore trends and variability.
+
+    index :
+     min: Minimum energy consumption.
+    avg: Average energy consumption.
+    max: Maximum energy consumption.
+    DateTime: Combined timestamp.
+
+and then Resample the data to create hourly, daily, and weekly summaries.
+Resample the data to create hourly, daily, and weekly summaries.
+Generate visualizations to identify trends, distributions, and peak times.
+
+Visualize Trends: Generate line plots to visualize daily energy consumption trends.
+Analyze Distributions: Create histograms to study the spread of energy consumption values.
+Highlight Peak Demand: Pinpoint the peak demand date on the visualizations.
+
+
+Descriptive Analysis: Outputs insights like mean, median, variance, and peak demand.
+AI Optimization Model: Evaluates Linear Regression, Decision Trees, and Random Forests. Selects the best-performing model based on R².
+Model Validation: Uses MAE, RMSE, and R² for performance evaluation.
+Visualizations: Includes trend analysis and distribution plots.
