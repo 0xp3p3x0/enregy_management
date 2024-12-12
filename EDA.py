@@ -47,6 +47,7 @@ hour_data = hour_data.reset_index()
 hour_data['load'] = hour_data.apply(lambda row: insert_load_data(df_load, row['DateTime']), axis=1)
 print(hour_data)
 
+hour_data.to_csv('total.csv', index=False)
 # detecting outlier
 
 plt.figure(figsize=(10,5))

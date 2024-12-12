@@ -1,1 +1,0 @@
-python MA_analysis.py
