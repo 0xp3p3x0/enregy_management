@@ -18,7 +18,8 @@ train_data['DateTime'] = pd.to_datetime(train_data['DateTime'])
 
 train_data = train_data.sort_values('DateTime')
 Y = train_data['avg'].values
-Y = (Y - Y.min()) / (Y.max() - Y.min())  # Normalize
+wide = (Y.max() - Y.min()) 
+Y = (Y - Y.min()) / wide # Normalize
 
 X = train_data['DateTime'].apply(lambda x: [x.year, x.month, x.day, x.hour, x.minute]).tolist()
 X = np.array(X, dtype=np.float32)  # Convert to a NumPy array of type float32
@@ -55,4 +56,4 @@ input_features = input_features.reshape((input_features.shape[0], 1, input_featu
 predicted_value = model.predict(input_features)
 
 
-print(f"Predicted Value: {predicted_value}")
+print(f"Predicted Value: {predicted_value * wide}")
