@@ -33,8 +33,12 @@ if os.path.exists('model.h5'):
     model = load_model('model.h5')
 else:
     model = Sequential([
-        LSTM(50, activation='relu', input_shape=(X.shape[1], X.shape[2])),
-        Dense(1)
+    LSTM(50, activation='relu', input_shape=(X.shape[1], X.shape[2]), return_sequences=True),
+    # Second LSTM layer
+    LSTM(50, activation='relu', return_sequences=True),
+    # Third (final) LSTM layer
+    LSTM(50, activation='relu', return_sequences=False),
+    Dense(1)
     ])
     model.compile(optimizer='adam', loss= 'MSE' )
 
