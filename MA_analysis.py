@@ -19,18 +19,6 @@ def load_and_prepare_data(filepath):
     data['max'] = pd.to_numeric(data['max'], errors='coerce')
     return data
 
-def descriptive_stats(data):
-    hourly_data = data.resample('D', on='DateTime').mean()
-    stats = {
-        "Mean Consumption": hourly_data['avg'].mean(),
-        "Median Consumption": hourly_data['avg'].median(),
-        "Standard Deviation": hourly_data['avg'].std(),
-        "Variance": hourly_data['avg'].var(),
-        "Peak Demand Date": hourly_data['avg'].idxmax(),
-        "Peak Avg Consumption": hourly_data['avg'].max(),
-    }
-    return stats, hourly_data
-
 def train_ai_model(data):
     data['hour'] = data['DateTime'].dt.hour
     X = data[['hour', 'min', 'max']]
