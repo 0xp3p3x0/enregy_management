@@ -209,7 +209,7 @@ def predict():
 
         # Predict
         predicted_value = model.predict(input_features)
-        messagebox.showinfo("Action", f"Valid datetime: {predicted_value * wide + minY}")
+        messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
     except ValueError:
         messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
 
