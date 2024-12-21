@@ -80,6 +80,7 @@ X = X.reshape((X.shape[0], 1, X.shape[1]))
 # Load or create model
 if os.path.exists('model.h5'):
     model = load_model('model.h5')
+    model.compile(optimizer='adam', loss= MeanSquaredError() )
 else:
     model = Sequential([
     LSTM(32, activation='relu', input_shape=(X.shape[1], X.shape[2]), return_sequences=True),
