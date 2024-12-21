@@ -130,7 +130,7 @@ def train_ai_model(data):
 
 def visualize(data, daily_data, stats):
     
-    plt.subplot(2, 2, 1)
+    plt.subplot(1, 2, 1)
     plt.plot(daily_data.index, daily_data['avg'], label='Average Daily Consumption', marker='o')
     plt.axhline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axhline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
@@ -142,7 +142,7 @@ def visualize(data, daily_data, stats):
     plt.grid(True)
 
     
-    plt.subplot(2, 2, 2)
+    plt.subplot(1, 2, 2)
     sns.histplot(daily_data['avg'], kde=True, bins=30, color='blue', edgecolor='black')
     plt.axvline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axvline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
