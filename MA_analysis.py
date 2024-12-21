@@ -49,7 +49,8 @@ def train_ai_model(data):
     return best_model, results
 
 def visualize(data, daily_data, stats):
-    plt.figure(figsize=(12, 6))
+    
+    plt.subplot(2, 2, 1)
     plt.plot(daily_data.index, daily_data['avg'], label='Average Daily Consumption', marker='o')
     plt.axhline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axhline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
@@ -59,8 +60,9 @@ def visualize(data, daily_data, stats):
     plt.title('Daily Energy Consumption Trends')
     plt.legend()
     plt.grid(True)
-    plt.show()
+
     
+    plt.subplot(2, 2, 2)
     sns.histplot(daily_data['avg'], kde=True, bins=30, color='blue', edgecolor='black')
     plt.axvline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axvline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
@@ -68,6 +70,9 @@ def visualize(data, daily_data, stats):
     plt.ylabel('Frequency')
     plt.title('Distribution of Daily Energy Consumption')
     plt.legend()
+    
+    plt.tight_layout()
+    
     plt.show()
 
 

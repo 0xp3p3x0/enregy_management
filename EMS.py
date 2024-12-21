@@ -12,6 +12,14 @@ from keras._tf_keras.keras.models import Sequential, load_model
 from keras._tf_keras.keras.layers import LSTM, Dense
 from keras._tf_keras.keras.losses import MeanSquaredError
 
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+
+
 #processing data
 def convert_to_24hr(date_val,time_str, tz_str):
     
@@ -88,8 +96,94 @@ else:
     model.compile(optimizer='adam', loss= MeanSquaredError() )
 
 #############################################################
+
+
+#EDA analysis
+def train_ai_model(data):
+    data['hour'] = data['DateTime'].dt.hour
+    X = data[['hour', 'min', 'max']]
+    y = data['avg']
+    
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    
+
+    models = {
+        "Linear Regression": LinearRegression(),
+        "Decision Tree": DecisionTreeRegressor(),
+        "Random Forest": RandomForestRegressor()
+    }
+    
+    results = {}
+    for name, model in models.items():
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        results[name] = {
+            "MAE": mean_absolute_error(y_test, y_pred),
+            "RMSE": np.sqrt(mean_squared_error(y_test, y_pred)),
+            "R²": r2_score(y_test, y_pred)
+        }
+   
+    best_model_name = max(results, key=lambda k: results[k]['R²'])
+    best_model = models[best_model_name]
+    
+    return best_model, results
+
+def visualize(data, daily_data, stats):
+    
+    plt.subplot(2, 2, 1)
+    plt.plot(daily_data.index, daily_data['avg'], label='Average Daily Consumption', marker='o')
+    plt.axhline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
+    plt.axhline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
+    plt.scatter(stats["Peak Demand Date"], stats["Peak Avg Consumption"], color='orange', label='Peak Demand', s=100)
+    plt.xlabel('Date')
+    plt.ylabel('Average Energy Consumption')
+    plt.title('Daily Energy Consumption Trends')
+    plt.legend()
+    plt.grid(True)
+
+    
+    plt.subplot(2, 2, 2)
+    sns.histplot(daily_data['avg'], kde=True, bins=30, color='blue', edgecolor='black')
+    plt.axvline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
+    plt.axvline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
+    plt.xlabel('Average Daily Consumption')
+    plt.ylabel('Frequency')
+    plt.title('Distribution of Daily Energy Consumption')
+    plt.legend()
+    
+    plt.tight_layout()
+    
+    plt.show()
+    
+def descriptive_stats(data):
+    daily_data = data.groupby(data['DateTime'].dt.date)['avg'].mean().reset_index()
+    daily_data.columns = ['Date', 'avg']
+    daily_data['Date'] = pd.to_datetime(daily_data['Date'])
+
+    stats = {
+        "Mean Consumption": daily_data['avg'].mean(),
+        "Median Consumption": daily_data['avg'].median(),
+        "Peak Avg Consumption": daily_data['avg'].max(),
+        "Peak Demand Date": daily_data.loc[daily_data['avg'].idxmax(), 'Date']
+    }
+    
+    return stats, daily_data
+#################################
 root = Tk()
 
+
+def corr():
+    stats, daily_data = descriptive_stats(train_data)
+    print("Descriptive Statistics:", stats)
+    
+    # Train AI-driven optimization model
+    best_model, model_results = train_ai_model(train_data)
+    print("Model Results:", model_results)
+    print("Best Model:", best_model)
+    
+    # Visualize results
+    visualize(train_data, daily_data, stats)
+    return
 def eda():
     plt.figure(figsize=(10, 5))  # Set the figure size for the plot
     c = df_total.corr()  # Compute the correlation matrix
@@ -124,15 +218,16 @@ root.title("Energy Management System")
 frm = ttk.Frame(root, padding=20)
 
 frm.grid()
-ttk.Button(frm,text="EDA analysis", command = eda).grid(column=1, row=0)
-ttk.Button(frm,text="Train LSTM model", command = trainmodel).grid(column=2, row=0)
-ttk.Button(frm,text="Predict", command = predict).grid(column=3, row=0)
-ttk.Button(frm,text="Quit", command = root.destroy).grid(column=4, row=0)
+ttk.Button(frm,text="Correlation", command = corr).grid(column=1, row=0)
+ttk.Button(frm,text="EDA analysis", command = eda).grid(column=2, row=0)
+ttk.Button(frm,text="Train LSTM model", command = trainmodel).grid(column=3, row=0)
+ttk.Button(frm,text="Predict", command = predict).grid(column=4, row=0)
+ttk.Button(frm,text="Quit", command = root.destroy).grid(column=5, row=0)
 
-datetime_entry = ttk.Entry(frm, width=60)
+ttk.Label(frm, text="Input Datetime : ").grid(column=1,row=1)
+datetime_entry = ttk.Entry(frm, width=80)
 
-datetime_entry.grid(column=1,row=1,columnspan=4,padx=5, pady=5)
-
+datetime_entry.grid(column=1,row=2,columnspan=5,padx=5, pady=5)
 
 root.mainloop()
 
