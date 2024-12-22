@@ -129,10 +129,10 @@ def train_ai_model(data):
     
     return best_model, results
 
-def visualize(data, daily_data, stats):
+def visualize(data, stats):
     
     plt.subplot(1, 2, 1)
-    plt.plot(daily_data.index, daily_data['avg'], label='Average Daily Consumption', marker='o')
+    plt.plot(data['DateTime'], data['avg'], label='Average Daily Consumption', marker='o')
     plt.axhline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axhline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
     plt.scatter(stats["Peak Demand Date"], stats["Peak Avg Consumption"], color='orange', label='Peak Demand', s=100)
@@ -144,7 +144,7 @@ def visualize(data, daily_data, stats):
 
     
     plt.subplot(1, 2, 2)
-    sns.histplot(daily_data['avg'], kde=True, bins=30, color='blue', edgecolor='black')
+    sns.histplot(data['avg'], kde=True, bins=30, color='blue', edgecolor='black')
     plt.axvline(stats["Mean Consumption"], color='r', linestyle='--', label='Mean Consumption')
     plt.axvline(stats["Median Consumption"], color='g', linestyle=':', label='Median Consumption')
     plt.xlabel('Average Daily Consumption')
@@ -157,33 +157,32 @@ def visualize(data, daily_data, stats):
     plt.show()
     
 def descriptive_stats(data):
-    daily_data = data.groupby(data['DateTime'].dt.date)['avg'].mean().reset_index()
-    daily_data.columns = ['Date', 'avg']
-    daily_data['Date'] = pd.to_datetime(daily_data['Date'])
-
+ 
     stats = {
-        "Mean Consumption": daily_data['avg'].mean(),
-        "Median Consumption": daily_data['avg'].median(),
-        "Peak Avg Consumption": daily_data['avg'].max(),
-        "Peak Demand Date": daily_data.loc[daily_data['avg'].idxmax(), 'Date']
+        "Mean Consumption": data['avg'].mean(),
+        "Median Consumption": data['avg'].median(),
+        "Peak Avg Consumption": data['avg'].max(),
+        "Peak Demand Date": data.loc[data['avg'].idxmax(), 'DateTime']
     }
     
-    return stats, daily_data
+    tmp_data = data[['DateTime','avg','min','max']]
+    
+    return stats, tmp_data
 #################################
 root = Tk()
 
 
 def corr():
-    stats, daily_data = descriptive_stats(train_data)
+    stats, data = descriptive_stats(train_data)
     print("Descriptive Statistics:", stats)
     
     # Train AI-driven optimization model
-    best_model, model_results = train_ai_model(train_data)
+    best_model, model_results = train_ai_model(data)
     print("Model Results:", model_results)
     print("Best Model:", best_model)
     
     # Visualize results
-    visualize(train_data, daily_data, stats)
+    visualize(data, stats)
     return
 def eda():
     plt.figure(figsize=(10, 5))  # Set the figure size for the plot
