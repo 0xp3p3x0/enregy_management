@@ -48,6 +48,7 @@ def insert_load_data(load_data, ltime):
 #load data
 df_load = pd.read_csv('LP.csv')
 df_total = pd.read_excel('total.xlsx')
+df_train = pd.read_excel('train.xlsx')
 
 df_total['DateTime'] = df_total.apply(lambda row: convert_to_24hr(row['Date'],row['Time'], row['TZ']), axis=1)
 df_total = df_total.drop(columns=['Date','Time'])
@@ -55,13 +56,20 @@ df_total = df_total.dropna(subset=['DateTime']).reset_index(drop=True)
 df_total.drop('TZ', axis=1, inplace=True)
 print(df_total)
 
+df_train['DateTime'] = df_train.apply(lambda row: convert_to_24hr(row['Date'],row['Time'], row['TZ']), axis=1)
+df_train = df_train.drop(columns=['Date','Time'])
+df_train = df_train.dropna(subset=['DateTime']).reset_index(drop=True)
+df_train.drop('TZ', axis=1, inplace=True)
+print(df_train)
+
+
 eda_data = df_total
 eda_data['load'] = df_total.apply(lambda row: insert_load_data(df_load, row['DateTime']), axis=1)
 
 
 ##LSTM
 
-train_data = df_total
+train_data = df_train
 train_data['DateTime'] = pd.to_datetime(train_data['DateTime'])
 
 train_data = train_data.sort_values('DateTime')
@@ -191,24 +199,40 @@ def eda():
     plt.show()
     return
 def trainmodel():
-    model.fit(X, Y, epochs=50, batch_size=32)
+    model.fit(X, Y, epochs=50, batch_size=256)
     messagebox.showinfo("Action", f"completed")
     model.save('model.h5')
     return
 def predict():
-    datetime_value = datetime_entry.get()
+    start_value = start_entry.get()
+    # end_value = end_entry.get()
+    # emp_flag = True
+    # if(end_value == ""): emp_flag =False 
     try:
         # Validate datetime input
-        new_datetime = datetime.strptime(datetime_value, '%Y-%m-%d %H:%M:%S')
-        input_features = np.array([[new_datetime.year, new_datetime.month, new_datetime.day,
-                                new_datetime.hour, new_datetime.minute]], dtype=np.float32)
+        start_datetime = datetime.strptime(start_value, '%Y-%m-%d %H:%M:%S')
+        # if(emp_flag):
+        #     end_datetime = datetime.strptime(end_value, '%Y-%m-%d %H:%M:%S')
+        #     input_features_end = np.array([[end_datetime.year, end_datetime.month, end_datetime.day,
+        #                             end_datetime.hour, end_datetime.minute]], dtype=np.float32)
+        #     input_features_end = input_features_end.reshape((input_features_end.shape[0], 1, input_features_end.shape[1]))
+            
+        input_features_start = np.array([[start_datetime.year, start_datetime.month, start_datetime.day,
+                                start_datetime.hour, start_datetime.minute]], dtype=np.float32)
+
+        
 
         # Reshape for LSTM: (samples, timesteps, features)
-        input_features = input_features.reshape((input_features.shape[0], 1, input_features.shape[1]))
+        input_features_start = input_features_start.reshape((input_features_start.shape[0], 1, input_features_start.shape[1]))
 
         # Predict
-        predicted_value = model.predict(input_features)
+        # if(emp_flag):
+        #     predicted_value = model.predict(input_features_start)
+        #     messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
+        # else:
+        predicted_value = model.predict(input_features_start)
         messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
+        
     except ValueError:
         messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
 
@@ -225,9 +249,11 @@ ttk.Button(frm,text="Predict", command = predict).grid(column=4, row=0)
 ttk.Button(frm,text="Quit", command = root.destroy).grid(column=5, row=0)
 
 ttk.Label(frm, text="Input Datetime : ").grid(column=1,row=1)
-datetime_entry = ttk.Entry(frm, width=80)
+start_entry = ttk.Entry(frm)
+end_entry = ttk.Entry(frm)
 
-datetime_entry.grid(column=1,row=2,columnspan=5,padx=5, pady=5)
+start_entry.grid(column=1,row=2,columnspan=3,padx=5, pady=5)
+end_entry.grid(column=3,row=2,columnspan=3,padx=5, pady=5)
 
 root.mainloop()
 

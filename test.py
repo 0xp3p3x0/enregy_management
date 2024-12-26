@@ -1,11 +1,32 @@
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from pynput.keyboard import Controller, Key
+import time
 
-df = pd.read_csv('total_csv.csv')
+def emit_keypress_from_string(input_string, delay=0.1):
+    """
+    Simulates keypress events for each character in the input string.
 
-new_col = ['DateTime', 'min','max','avg']
+    Args:
+        input_string (str): The string to emit as keypress events.
+        delay (float): Delay between each keypress in seconds.
+    """
+    keyboard = Controller()
 
-df = df[new_col]
-print(df)
-df.to_csv('total_csv.csv')
+    for char in input_string:
+        if char == '\n':  # Handle newline
+            keyboard.press(Key.enter)
+            keyboard.release(Key.enter)
+        elif char == '\t':  # Handle tab
+            keyboard.press(Key.tab)
+            keyboard.release(Key.tab)
+        elif char == ' ':  # Handle space
+            keyboard.press(Key.space)
+            keyboard.release(Key.space)
+        else:
+            keyboard.press(char)
+            keyboard.release(char)
+        time.sleep(delay)  # Add delay between keypresses
+
+if __name__ == "__main__":
+    # Example usage
+    input_string = "Hello, World!\nThis is a test string.\tEnjoy!"
+    emit_keypress_from_string(input_string, delay=0.2)
