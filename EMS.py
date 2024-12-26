@@ -181,7 +181,7 @@ root = Tk()
 
 
 def corr():
-    stats, data = descriptive_stats(train_data)
+    stats, data = descriptive_stats(df_total)
     print("Descriptive Statistics:", stats)
     
     # Train AI-driven optimization model
