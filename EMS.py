@@ -239,18 +239,33 @@ def predict():
 
         # Prepare features and predict for each datetime
         predictions = []
+        times = []
         for current_date in date_list:
             input_features = np.array([[current_date.year, current_date.month, current_date.day,
                                          current_date.hour, current_date.minute]], dtype=np.float32)
             input_features = input_features.reshape((input_features.shape[0], 1, input_features.shape[1]))
             
             predicted_value = model.predict(input_features)
+            predictions.append(predicted_value[0][0] * wide + minY)  # Scaled prediction
+            times.append(current_date)
+            
             formatted_value = "%.2f" % (predicted_value[0][0] * wide + minY)
             predictions.append(f"{current_date.strftime('%Y-%m-%d %H:%M:%S')}: {formatted_value} Kw")
 
-        # Display all predictions
-        result_message = "\n".join(predictions)
-        messagebox.showinfo("Predictions", f"Predicted Power:\n{result_message}")
+            plt.figure(figsize=(10, 5))
+            plt.plot(times, predictions, marker='o', linestyle='-', color='b', label='Predicted Power (Kw)')
+            plt.xlabel('Time')
+            plt.ylabel('Predicted Power (Kw)')
+            plt.title('Predicted Power Over Time')
+            plt.legend()
+            plt.grid()
+            plt.tight_layout()
+
+            # Show the graph
+            plt.show()
+            # Display all predictions
+            # result_message = "\n".join(predictions)
+            # messagebox.showinfo("Predictions", f"Predicted Power:\n{result_message}")
     
     except ValueError:
         messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
