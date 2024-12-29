@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -44,6 +44,22 @@ def insert_load_data(load_data, ltime):
             load += load_data['load'][i]
     return load;
 
+#untilites
+
+def generate_dates(start_date, end_date=None):
+    """
+    Generate a list of dates between start_date and end_date.
+    If end_date is None, return only the start_date.
+    """
+    if end_date:
+        current_date = start_date
+        date_list = []
+        while current_date <= end_date:
+            date_list.append(current_date)
+            current_date += timedelta(hours=1)
+        return date_list
+    else:
+        return [start_date]
 
 #load data
 df_load = pd.read_csv('LP.csv')
@@ -204,37 +220,74 @@ def trainmodel():
     model.save('model.h5')
     return
 def predict():
-    start_value = start_entry.get()
+    
+    start_value = start_entry.get()  # Retrieve start date from entry
+    end_value = end_entry.get()      # Retrieve end date from entry (optional)
+    emp_flag = True
+
+    try:
+        # Validate and parse input datetime strings
+        start_date = datetime.strptime(start_value, '%Y-%m-%d %H:%M:%S')
+        end_date = None
+        if end_value:
+            end_date = datetime.strptime(end_value, '%Y-%m-%d %H:%M:%S')
+        else:
+            emp_flag = False
+
+        # Generate the list of datetime values
+        date_list = generate_dates(start_date, end_date)
+
+        # Prepare features and predict for each datetime
+        predictions = []
+        for current_date in date_list:
+            input_features = np.array([[current_date.year, current_date.month, current_date.day,
+                                         current_date.hour, current_date.minute]], dtype=np.float32)
+            input_features = input_features.reshape((input_features.shape[0], 1, input_features.shape[1]))
+            
+            predicted_value = model.predict(input_features)
+            formatted_value = "%.2f" % (predicted_value[0][0] * wide + minY)
+            predictions.append(f"{current_date.strftime('%Y-%m-%d %H:%M:%S')}: {formatted_value} Kw")
+
+        # Display all predictions
+        result_message = "\n".join(predictions)
+        messagebox.showinfo("Predictions", f"Predicted Power:\n{result_message}")
+    
+    except ValueError:
+        messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {str(e)}")
+    # start_value = start_entry.get()
     # end_value = end_entry.get()
     # emp_flag = True
     # if(end_value == ""): emp_flag =False 
-    try:
-        # Validate datetime input
-        start_datetime = datetime.strptime(start_value, '%Y-%m-%d %H:%M:%S')
-        # if(emp_flag):
-        #     end_datetime = datetime.strptime(end_value, '%Y-%m-%d %H:%M:%S')
-        #     input_features_end = np.array([[end_datetime.year, end_datetime.month, end_datetime.day,
-        #                             end_datetime.hour, end_datetime.minute]], dtype=np.float32)
-        #     input_features_end = input_features_end.reshape((input_features_end.shape[0], 1, input_features_end.shape[1]))
+    # try:
+    #     # Validate datetime input
+    #     start_date = datetime.strptime(start_value, '%Y-%m-%d %H:%M:%S')
+    #     end_date = None
+    #     if end_value:
+    #         end_date = datetime.strptime(end_value, '%Y-%m-%d %H:%M:%S')
+    #         input_features_end = np.array([[end_date.year, end_date.month, end_date.day,
+    #                                 end_date.hour, end_date.minute]], dtype=np.float32)
+    #         input_features_end = input_features_end.reshape((input_features_end.shape[0], 1, input_features_end.shape[1]))
             
-        input_features_start = np.array([[start_datetime.year, start_datetime.month, start_datetime.day,
-                                start_datetime.hour, start_datetime.minute]], dtype=np.float32)
+    #     input_features_start = np.array([[start_date.year, start_date.month, start_date.day,
+    #                             start_date.hour, start_date.minute]], dtype=np.float32)
 
         
 
-        # Reshape for LSTM: (samples, timesteps, features)
-        input_features_start = input_features_start.reshape((input_features_start.shape[0], 1, input_features_start.shape[1]))
+    #     # Reshape for LSTM: (samples, timesteps, features)
+    #     input_features_start = input_features_start.reshape((input_features_start.shape[0], 1, input_features_start.shape[1]))
 
-        # Predict
-        # if(emp_flag):
-        #     predicted_value = model.predict(input_features_start)
-        #     messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
-        # else:
-        predicted_value = model.predict(input_features_start)
-        messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
+    #     # Predict
+    #     if(emp_flag):
+    #         predicted_value = model.predict(input_features_start)
+    #         messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
+    #     else:
+    #         predicted_value = model.predict(input_features_start)
+    #         messagebox.showinfo("Action", f"predict power: {predicted_value[0][0] * wide + minY} Kw")
         
-    except ValueError:
-        messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
+    # except ValueError:
+    #     messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
 
     return
 
