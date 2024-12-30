@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from datetime import datetime, timedelta
+from decimal import Decimal
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -250,7 +251,7 @@ def predict():
             times.append(current_date)
             
             formatted_value = "%.2f" % (abs(predicted_value[0][0] * wide + minY))
-            predictions.append(formatted_value)
+            predictions.append(Decimal(formatted_value))
 
         data = pd.DataFrame({'Datetime': times, 'Predictions': predictions})
         data['load'] = data.apply(lambda row: insert_load_data(df_load, row['Datetime']), axis=1)
@@ -261,6 +262,14 @@ def predict():
         # Display all predictions
         # result_message = "\n".join(predictions)
         messagebox.showinfo("Predictions", f"done")
+        
+        plt.plot( df['Datetime'],  df['Predictions'], label='Average Daily Consumption', marker='o')
+        plt.xlabel('Date')
+        plt.ylabel('Average Energy Consumption')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+        
     
     except ValueError:
         messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
