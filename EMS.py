@@ -249,23 +249,18 @@ def predict():
             #predictions.append(predicted_value[0][0] * wide + minY)  # Scaled prediction
             times.append(current_date)
             
-            formatted_value = "%.2f" % (predicted_value[0][0] * wide + minY)
+            formatted_value = "%.2f" % (abs(predicted_value[0][0] * wide + minY))
             predictions.append(formatted_value)
 
-        plt.figure(figsize=(10, 5))
-        plt.plot(times, predictions, marker='o', linestyle='-', color='b', label='Predicted Power (Kw)')
-        plt.xlabel('Time')
-        plt.ylabel('Predicted Power (Kw)')
-        plt.title('Predicted Power Over Time')
-        plt.legend()
-        plt.grid()
-        plt.tight_layout()
-
-        # Show the graph
-        plt.show()
-            # Display all predictions
-            # result_message = "\n".join(predictions)
-            # messagebox.showinfo("Predictions", f"Predicted Power:\n{result_message}")
+        data = pd.DataFrame({'Datetime': times, 'Predictions': predictions})
+        data['load'] = data.apply(lambda row: insert_load_data(df_load, row['Datetime']), axis=1)
+        
+        df = pd.DataFrame(data)
+        output_path = 'predictions.xlsx'
+        df.to_excel(output_path, index=False)
+        # Display all predictions
+        # result_message = "\n".join(predictions)
+        messagebox.showinfo("Predictions", f"done")
     
     except ValueError:
         messagebox.showerror("Error", "Invalid datetime format! Use YYYY-MM-DD HH:MM:SS")
