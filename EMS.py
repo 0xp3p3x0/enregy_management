@@ -261,14 +261,18 @@ def predict():
         df.to_excel(output_path, index=False)
         # Display all predictions
         # result_message = "\n".join(predictions)
-        messagebox.showinfo("Predictions", f"done")
         
-        plt.plot( df['Datetime'],  df['Predictions'], label='Average Daily Consumption', marker='o')
-        plt.xlabel('Date')
-        plt.ylabel('Average Energy Consumption')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+        if emp_flag:
+            messagebox.showinfo("Predictions", f"done")
+            
+            plt.plot( df['Datetime'],  df['Predictions'], label='Average Daily Consumption', marker='o')
+            plt.xlabel('Date')
+            plt.ylabel('Average Energy Consumption')
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+        else:
+             messagebox.showinfo("Predictions", f"{data['Predictions'][0]}Kw")
         
     
     except ValueError:
