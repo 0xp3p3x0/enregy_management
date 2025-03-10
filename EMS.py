@@ -43,7 +43,7 @@ def insert_load_data(load_data, ltime):
         endtime  = datetime.strptime(load_data['end'][i], '%H:%M:%S').time()
         if starttime < localtime and endtime > localtime:
             load += load_data['load'][i]
-    return load;
+    return load
 
 #untilites
 
@@ -64,7 +64,7 @@ def generate_dates(start_date, end_date=None):
 
 #load data
 df_load = pd.read_csv('LP.csv')
-df_total = pd.read_excel('total.xlsx')
+df_total = pd.read_excel('train.xlsx')
 df_train = pd.read_excel('train.xlsx')
 
 df_total['DateTime'] = df_total.apply(lambda row: convert_to_24hr(row['Date'],row['Time'], row['TZ']), axis=1)
