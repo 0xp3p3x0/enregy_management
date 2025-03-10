@@ -64,7 +64,9 @@ def generate_dates(start_date, end_date=None):
 
 #load data
 df_load = pd.read_csv('LP.csv')
+
 df_total = pd.read_excel('train.xlsx')
+
 df_train = pd.read_excel('train.xlsx')
 
 df_total['DateTime'] = df_total.apply(lambda row: convert_to_24hr(row['Date'],row['Time'], row['TZ']), axis=1)
