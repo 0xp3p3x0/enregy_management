@@ -57,7 +57,7 @@ def generate_dates(start_date, end_date=None):
         date_list = []
         while current_date <= end_date:
             date_list.append(current_date)
-            current_date += timedelta(hours=1)
+            current_date += timedelta(minutes=1)
         return date_list
     else:
         return [start_date]
